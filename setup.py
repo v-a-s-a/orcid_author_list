@@ -8,6 +8,6 @@ setup(name='orcid_author_list',
       author_email='',
       license='MIT',
       packages=find_packages(),
-      install_requires=['requests', 'rtfunicode', 'pycountry']
+      install_requires=['requests', 'rtfunicode', 'pycountry'],
       scripts=['src/orcid_author_list.py'],
       zip_safe=False)
