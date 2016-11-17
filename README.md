@@ -5,7 +5,7 @@ Using ORCID API v1.2_rc7
 
 ## Installation
 ```
-pip install git+https://github.com/vtrubets/orcid_author_list.git
+$ pip install git+https://github.com/vtrubets/orcid_author_list.git
 ```
 This installs orcid_author_list and its dependencies. It makes `orcid_author_list.py` callable from the command line. If you don't want to pollute your current python environment, it is recommended that you use a `virtualenv`, `conda` env or something similar.
 
