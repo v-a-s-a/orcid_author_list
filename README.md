@@ -1,6 +1,9 @@
-# orcid_author_list
-Generate an RTF formatted author list from a set of ORCIDs. Currently, there are a few mappings coded into the program that convert certain institution names to their canonical reference.
+# ORCID Author List
+Generate an Rich Text Format (RTF) file containing an author list from a set of ORCIDs. Additionaly, there are a few mappings coded into the program that convert certain institution names to their canonical reference.
 
+I am pulling from ORCID v1.2_rc7.
+
+(ORCID website)['http://orcid.org/']
 
 ## Installation
 ```
