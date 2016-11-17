@@ -3,7 +3,7 @@ Generate an Rich Text Format (RTF) file containing an author list from a set of 
 
 I am pulling from ORCID v1.2_rc7.
 
-(ORCID website)['http://orcid.org/']
+[ORCID website]('http://orcid.org/')
 
 ## Installation
 ```
