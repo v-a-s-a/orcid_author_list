@@ -27,12 +27,12 @@ class Author:
             print("Failed to connect to ORCID database.")
 
         # parse names
-        self.givenName = r.json().get('orcid-profile').get('orcid-bio').get('personal-details').get('given-names').get('value').title()
-        self.familyName = r.json().get('orcid-profile').get('orcid-bio').get('personal-details').get('family-name').get('value').title()
+        self.givenName = r.json()['orcid-profile']['orcid-bio']['personal-details']['given-names']['value'].title()
+        self.familyName = r.json()['orcid-profile']['orcid-bio']['personal-details']['family-name']['value'].title()
 
         # parse email -- stored as None if email is not marked as primary or if email is not verified
         if r.json().get('orcid-profile').get('orcid-bio').get('contact-details'):
-            emails = r.json().get('orcid-profile').get('orcid-bio').get('contact-details').get('email')
+            emails = r.json()['orcid-profile']['orcid-bio']['contact-details']['email']
             primaryEmails = [x for x in emails if (x.get('primary') is True and x.get('verified'))]
             otherEmails = [x for x in emails if (x.get('primary') is False and x.get('verified'))]
             if primaryEmails:
@@ -46,7 +46,7 @@ class Author:
 
         # parse affiliations
         if not r.json().get('orcid-profile').get('orcid-activities'):
-            print('Author has no recorded and publicly available information. Source: {0}'.format(r.json().get('orcid-profile').get('orcid-identifier').get('uri')))
+            print('Author has no recorded and publicly available information. Source: {0}'.format(r.json()['orcid-profile']['orcid-identifier']['uri']))
             self.affiliations = None
         elif not r.json().get('orcid-profile').get('orcid-activities').get('affiliations'):
             print('Author has no recorded and publicly available affiliations. Source: {0}'.format(r.json().get('orcid-profile').get('orcid-identifier').get('uri')))
