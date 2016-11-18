@@ -10,11 +10,10 @@ class Author:
     An author on the publication list.
     """
 
-    def __init__(self, orcid):
+    def __init__(self, orcid, affiliations_checker):
         """
-        An author is uniquely identified by their ORCID.
-
-        The orcid data base is hit for all relevant information.
+        An author is uniquely identified by their ORCID. All author information
+        is drawn from the ORCID database.
         """
         self.orcid = orcid
 
@@ -53,16 +52,19 @@ class Author:
             print('Author has no recorded and publicly available affiliations. Source: {0}'.format(r.json().get('orcid-profile').get('orcid-identifier').get('uri')))
             self.affiliations = None
         else:
-            affiliations = r.json()['orcid-profile']['orcid-activities']['affiliations']['affiliation']
-            currentAffiliations = filter(lambda affiliation: affiliation.get('end-date') is None and affiliation.get('organization'), affiliations)
-            self.affiliations = remove_duplicates([Affiliation(
-                organization_name=value['organization']['name'],
+            affiliations_data = r.json()['orcid-profile']['orcid-activities']['affiliations']['affiliation']
+            current_affiliations = filter(lambda affiliation: affiliation.get('end-date') is None and affiliation.get('organization'), affiliations_data)
+            affiliations = [Affiliation(
+                institution_name=value['organization']['name'],
                 department=value['department-name'],
-                organization_city=value['organization']['address']['city'],
-                organization_region=value['organization']['address']['region'],
-                organization_country=value['organization']['address']['country'],
-                disambiguated_organization_identifier=None,
-                disambiguation_source=None) for value in currentAffiliations])
+                city=value['organization']['address']['city'],
+                region=value['organization']['address']['region'],
+                country=value['organization']['address']['country'],
+                disambiguated_id=None,
+                disambiguation_source=None) for value in current_affiliations]
+
+            # check against the canonical affiliations
+            self.affiliations = remove_duplicates([affiliations_checker.validate(x) for x in affiliations])
 
     def __repr__(self):
         return '{first_name} {family_name}'.format(first_name=self.givenName, family_name=self.familyName)

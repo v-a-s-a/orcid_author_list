@@ -12,6 +12,7 @@ import rtfunicode
 import argparse as arg
 
 from Author import Author
+from CanonicalAffiliations import CanonicalAffiliations
 from utilities import remove_duplicates
 
 
@@ -26,9 +27,12 @@ def __main__():
 
     dat = [line for line in open(args.input_file)]
 
+    # load canonical affiliations
+    affiliations_checker = CanonicalAffiliations()
+
     # load authors from orcid db
     orcids = remove_duplicates([x.strip() for x in dat if x])
-    authors = {orcid: Author(orcid) for orcid in orcids}
+    authors = {orcid: Author(orcid, affiliations_checker) for orcid in orcids}
 
     # index unque affiliations based on author order in the orginal .csv file
     affiliations_index = dict()
@@ -43,8 +47,6 @@ def __main__():
                 affiliations_index[affiliation] = counter
                 affiliations_index[counter] = affiliation
                 counter += 1
-
-    # pdb.set_trace()
 
     with open(args.output_file, 'wb') as outFile:
         # rtf "header"
