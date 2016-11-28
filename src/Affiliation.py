@@ -7,22 +7,17 @@ class Affiliation:
     """
     An author's affiliation.
     """
-    def check_string_arg(self, arg):
-        if arg:
-            return arg
-        else:
-            return ''
 
     def __init__(self, department='', institution_name='', city='',
                  region='', country='',
                  disambiguated_id='', disambiguation_source=''):
-        self.department = self.check_string_arg(department)
-        self.institution_name = self.check_string_arg(institution_name)
-        self.city = self.check_string_arg(city)
-        self.region = self.check_string_arg(region)
-        self.country = self.check_string_arg(country)
-        self.disambiguated_id = self.check_string_arg(disambiguated_id)
-        self.disambiguation_source = self.check_string_arg(disambiguation_source)
+        self.department = self.munge_field(department)
+        self.institution_name = self.munge_field(institution_name)
+        self.city = self.munge_field(city)
+        self.region = self.munge_field(region)
+        self.country = self.munge_field(country)
+        self.disambiguated_id = self.munge_field(disambiguated_id)
+        self.disambiguation_source = self.munge_field(disambiguation_source)
 
     def __eq__(self, other):
         """
@@ -67,5 +62,3 @@ class Affiliation:
                                  self.country])
 
         return hash(_hash_string)
-
-
