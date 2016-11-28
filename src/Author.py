@@ -10,6 +10,26 @@ class Author:
     An author on the publication list.
     """
 
+    def _parse_affiliation_response(self, response):
+        """
+        Parse the ORCID API response into fields to pass into an Affiliation object.
+        """
+        if response['organization'].get('disambiguated-organization'):
+            disambiguated_id = response['organization'].get('disambiguated-organization').get('disambiguated-organization-identifier')
+            disambiguation_source = response['organization'].get('disambiguated-organization').get('disambiguation-source')
+        else:
+            disambiguated_id = ''
+            disambiguation_source = ''
+
+        result = Affiliation(
+            institution_name=response['organization']['name'],
+            department=response['department-name'],
+            city=response['organization']['address']['city'],
+            region=response['organization']['address']['region'],
+            country=response['organization']['address']['country'],
+            disambiguated_id=disambiguated_id,
+            disambiguation_source=disambiguation_source)
+
     def __init__(self, orcid, affiliations_checker):
         """
         An author is uniquely identified by their ORCID. All author information
@@ -58,14 +78,10 @@ class Author:
         else:
             affiliations_data = r.json()['orcid-profile']['orcid-activities']['affiliations']['affiliation']
             current_affiliations = filter(lambda affiliation: affiliation.get('end-date') is None and affiliation.get('organization'), affiliations_data)
-            affiliations = [Affiliation(
-                institution_name=value['organization']['name'],
-                department=value['department-name'],
-                city=value['organization']['address']['city'],
-                region=value['organization']['address']['region'],
-                country=value['organization']['address']['country'],
-                disambiguated_id=None,
-                disambiguation_source=None) for value in current_affiliations]
+
+            # get postal code from RINGGOLD
+
+            affiliations = [ self._parse_affiliation_response(value) for value in current_affiliations]
 
             # check against the canonical affiliations
             self.affiliations = remove_duplicates([affiliations_checker.validate(x) for x in affiliations])

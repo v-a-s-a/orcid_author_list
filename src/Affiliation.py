@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import pycountry
-
+from utilities import munge_field
 
 class Affiliation:
     """
@@ -12,14 +12,14 @@ class Affiliation:
                  region='', country='',
                  disambiguated_id='', disambiguation_source='',
                  postal_code=''):
-        self.department = self.munge_field(department)
-        self.institution_name = self.munge_field(institution_name)
-        self.city = self.munge_field(city)
-        self.region = self.munge_field(region)
-        self.country = self.munge_field(country)
-        self.disambiguated_id = self.munge_field(disambiguated_id)
-        self.disambiguation_source = self.munge_field(disambiguation_source)
-        self.postal_code = self.munge_field(postal_code)
+        self.department = munge_field(department)
+        self.institution_name = munge_field(institution_name)
+        self.city = munge_field(city)
+        self.region = munge_field(region)
+        self.country = munge_field(country)
+        self.disambiguated_id = munge_field(disambiguated_id)
+        self.disambiguation_source = munge_field(disambiguation_source)
+        self.postal_code = munge_field(postal_code)
 
     def __eq__(self, other):
         """
