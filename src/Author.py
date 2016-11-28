@@ -46,10 +46,14 @@ class Author:
 
         # parse affiliations
         if not r.json().get('orcid-profile').get('orcid-activities'):
-            print('Author has no recorded and publicly available information. Source: {0}'.format(r.json()['orcid-profile']['orcid-identifier']['uri']))
+            print(
+                'Author has no recorded and publicly available information. Source: {0}'.format(
+                    r.json()['orcid-profile']['orcid-identifier']['uri']))
             self.affiliations = None
         elif not r.json().get('orcid-profile').get('orcid-activities').get('affiliations'):
-            print('Author has no recorded and publicly available affiliations. Source: {0}'.format(r.json().get('orcid-profile').get('orcid-identifier').get('uri')))
+            print(
+                'Author has no recorded and publicly available affiliations. Source: {0}'.format(
+                    r.json().get('orcid-profile').get('orcid-identifier').get('uri')))
             self.affiliations = None
         else:
             affiliations_data = r.json()['orcid-profile']['orcid-activities']['affiliations']['affiliation']

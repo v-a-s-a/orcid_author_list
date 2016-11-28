@@ -22,3 +22,7 @@ def munge_field(arg):
     else:
         res = ''
     return res
+
+
+def load_cathryns_changes(xlsx_file):
+    pass
