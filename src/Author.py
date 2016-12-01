@@ -79,13 +79,10 @@ class Author:
             affiliations_data = r.json()['orcid-profile']['orcid-activities']['affiliations']['affiliation']
             current_affiliations = filter(lambda affiliation: affiliation.get('end-date') is None and affiliation.get('organization'), affiliations_data)
 
-            # get postal code from RINGGOLD
-
             affiliations = [self._parse_affiliation_response(value) for value in current_affiliations]
 
             # check against the canonical affiliations
             checked_affiliations = remove_duplicates((affiliations_checker.validate(x) for x in affiliations))
-
             self.affiliations = [affiliations_checker.guess_department(x) for x in checked_affiliations]
 
     def __repr__(self):
