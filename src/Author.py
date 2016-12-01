@@ -21,7 +21,7 @@ class Author:
             disambiguated_id = ''
             disambiguation_source = ''
 
-        result = Affiliation(
+        return Affiliation(
             institution_name=response['organization']['name'],
             department=response['department-name'],
             city=response['organization']['address']['city'],
@@ -81,10 +81,12 @@ class Author:
 
             # get postal code from RINGGOLD
 
-            affiliations = [ self._parse_affiliation_response(value) for value in current_affiliations]
+            affiliations = [self._parse_affiliation_response(value) for value in current_affiliations]
 
             # check against the canonical affiliations
-            self.affiliations = remove_duplicates([affiliations_checker.validate(x) for x in affiliations])
+            checked_affiliations = remove_duplicates((affiliations_checker.validate(x) for x in affiliations))
+
+            self.affiliations = [affiliations_checker.guess_department(x) for x in checked_affiliations]
 
     def __repr__(self):
         return '{first_name} {family_name}'.format(first_name=self.givenName, family_name=self.familyName)

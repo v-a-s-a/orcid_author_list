@@ -47,13 +47,19 @@ class Affiliation:
         )
 
     def __repr__(self):
-        proper_country = pycountry.countries.get(
-            alpha_2=self.country).name
 
-        return '{dept} {name}, {city}, {region}, {country} {postal_code}.'.format(
+        proper_country = pycountry.countries.lookup(self.country).name
+
+        return '{dept}, {name}, {city}, {region}, {country} {postal_code}.'.format(
             dept=self.department, name=self.institution_name,
             city=self.city, region=self.region,
             country=proper_country, postal_code=self.postal_code)
+
+        # return '{dept}, {name}, {city}, {region}, {country} {postal_code}. {id} {source}'.format(
+        #     dept=self.department, name=self.institution_name,
+        #     city=self.city, region=self.region,
+        #     country=proper_country, postal_code=self.postal_code,
+        #    id=self.disambiguated_id, source=self.disambiguation_source)
 
     def __hash__(self):
         _hash_string = ' '.join([self.disambiguated_id,

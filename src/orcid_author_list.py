@@ -10,6 +10,7 @@ TODO:
 
 import rtfunicode
 import argparse as arg
+import pdb
 
 from Author import Author
 from CanonicalAffiliations import CanonicalAffiliations
@@ -35,17 +36,19 @@ def __main__():
     authors = {orcid: Author(orcid, affiliations_checker) for orcid in orcids}
 
     # index unque affiliations based on author order in the orginal .csv file
-    affiliations_index = dict()
+    affiliations_index = dict()  # institution: printed index
+    index_affiliations = dict()  # printed index: institution
     counter = 1
     for orcid in orcids:
         if authors[orcid].affiliations:
             affiliations = authors[orcid].affiliations
         else:
             continue
+
         for affiliation in affiliations:
             if not affiliations_index.get(affiliation):
                 affiliations_index[affiliation] = counter
-                affiliations_index[counter] = affiliation
+                index_affiliations[counter] = affiliation
                 counter += 1
 
     with open(args.output_file, 'wb') as outFile:
@@ -56,24 +59,42 @@ def __main__():
         authors_with_affiliations = [authors[orcid]
                                      for orcid in orcids
                                      if authors[orcid].affiliations]
+        # pdb.set_trace()
         author_affiliations = [author.affiliations
                                for author in authors_with_affiliations]
-        formatted_affiliations_indices = ['{\\super ' + str(sorted([affiliations_index[affiliation] for affiliation in affiliations])).strip('[').strip(']') + '}' for affiliations in author_affiliations]
+        formatted_affiliations_indices = ['{\\super ' + str(sorted([affiliations_index[affiliation]
+                                          for affiliation in affiliations])).strip('[').strip(']') + '}' for affiliations in author_affiliations]
         encoded_affiliations_indicies = [x.encode('utf8') for x in formatted_affiliations_indices]
 
         encoded_authors = [str(author).encode('rtfunicode') for author in authors_with_affiliations]
-        out_bytes += u'\n'.encode('rtfunicode').join([b''.join(x) for x in zip(encoded_authors, encoded_affiliations_indicies)])
-        out_bytes += u'\n\n'.encode('rtfunicode')
+        final_authors = (b''.join(x) for x in zip(encoded_authors, encoded_affiliations_indicies))
+        out_bytes += b''.join((b'{\pard' + author + b'\par}' for author in final_authors))
+        out_bytes += b'\par'
 
         # print affiliations
         # encoded_affiliations = [str(affiliations_index[i + 1]).replace(' ,', '').encode('rtfunicode') for i in range(int(len(affiliations_index) / 2))]
         # encoded_affiliation_index = ['{{\\super {0}}}'.format(i + 1).encode('utf8') for i in range(int(len(affiliations_index) / 2))]
         # out_bytes += u'\n'.encode('rtfunicode').join([b''.join(x) for x in zip(encoded_affiliation_index, encoded_affiliations)])
 
-        sorted_affiliations = [str(affiliations_index[i + 1]).replace(' ,', '').encode('rtfunicode') for i in range(int(len(affiliations_index) / 2))]
-        encoded_affiliations = [str(affiliations_index[i + 1]).replace(' ,', '').encode('rtfunicode') for i in range(int(len(affiliations_index) / 2))]
-        encoded_affiliation_index = ['{{\\super {0}}}'.format(i + 1).encode('utf8') for i in range(int(len(affiliations_index) / 2))]
-        out_bytes += u'\n'.encode('rtfunicode').join([b''.join(x) for x in zip(encoded_affiliation_index, encoded_affiliations)])
+        sorted_affiliations = [index_affiliations[i + 1]
+                               for i in range(len(affiliations_index))]
+
+        if False:
+            print("Sorting affiliations.")
+            sorted_affiliations = sorted([str(x) for x in sorted_affiliations])
+
+            encoded_affiliations = [x.replace(' ,', '').replace(' .', '.').strip().strip(', ').encode('rtfunicode')
+                                    for x in sorted_affiliations]
+            encoded_affiliation_index = ['{{\\super {0}}}'.format(affiliations_index[i]).encode('utf8')
+                                         for i in sorted_affiliations]
+        else:
+            encoded_affiliations = [str(x).replace(' ,', '').replace(' .', '.').strip().strip(', ').encode('rtfunicode')
+                                    for x in sorted_affiliations]
+            encoded_affiliation_index = ['{{\\super {0}}}'.format(affiliations_index[index_affiliations[i + 1]]).encode('utf8')
+                                         for i in range(len(affiliations_index))]
+
+        final_institutions = (b''.join(x) for x in zip(encoded_affiliation_index, encoded_affiliations))
+        out_bytes += b''.join((b'{\pard' + institution + b'\par}' for institution in final_institutions))
 
         # end rtf file
         out_bytes += b'}'
