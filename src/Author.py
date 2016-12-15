@@ -3,8 +3,10 @@
 import requests as req
 from Affiliation import Affiliation
 from utilities import remove_duplicates
+import functools
 
 
+@functools.total_ordering
 class Author:
     """
     An author on the publication list.
@@ -30,12 +32,13 @@ class Author:
             disambiguated_id=disambiguated_id,
             disambiguation_source=disambiguation_source)
 
-    def __init__(self, orcid, affiliations_checker):
+    def __init__(self, orcid, affiliations_checker, contributions):
         """
         An author is uniquely identified by their ORCID. All author information
         is drawn from the ORCID database.
         """
         self.orcid = orcid
+        self.contributions = contributions
 
         # hit orcid for the author profile
         try:
@@ -44,7 +47,7 @@ class Author:
                 headers={'Accept': 'application/orcid+json'})
             r.raise_for_status()
         except req.ConnectionError:
-            print("Failed to connect to ORCID database.")
+            print("Failed to connect to ORCID database: 'http://pub.orcid.org/v1.2_rc7/{0}/orcid-profile'".format(orcid))
 
         # parse names
         self.givenName = r.json()['orcid-profile']['orcid-bio']['personal-details']['given-names']['value'].title()
@@ -85,5 +88,77 @@ class Author:
             checked_affiliations = remove_duplicates((affiliations_checker.validate(x) for x in affiliations))
             self.affiliations = [affiliations_checker.guess_department(x) for x in checked_affiliations]
 
+        leaders = ["doug levinson",
+                   "naomi wray",
+                   "cathryn lewis",
+                   "gerome breen",
+                   "pat sullivan"]
+        if self.givenName.lower() + " " + self.familyName.lower() == "stephan ripke":
+            self.group = 1
+        elif 'PI' in self.contributions:
+            self.group = 3
+        elif self.givenName.lower() + " " + self.familyName.lower() in leaders:
+            self.group = 4
+        else:
+            self.group = 2
+
     def __repr__(self):
         return '{first_name} {family_name}'.format(first_name=self.givenName, family_name=self.familyName)
+
+    def __lt__(self, other):
+        """[1] Stephan Ripke
+            [2] PGC MDD members
+            [3] Study PIs
+            [4] Doug Levinson, Naomi Wray, Cathryn Lewis, Gerome Breen, Pat Sullivan
+        """
+        # are one of you stephan ripke?
+
+        if self.group > other.group:
+            return False
+        if self.group < other.group:
+            return True
+        else:
+            if self.familyName.lower() > other.familyName.lower():
+                return False
+            elif self.familyName.lower() < other.familyName.lower():
+                return True
+            else:
+                return False
+
+    def __eq__(self, other):
+        """[1] Stephan Ripke
+            [2] PGC MDD members
+            [3] Study PIs
+            [4] Doug Levinson, Naomi Wray, Cathryn Lewis, Gerome Breen, Pat Sullivan
+        """
+        # are one of you stephan ripke?
+
+        if self.group != other.group:
+            return False
+        else:
+            if self.familyName.lower() == other.familyName.lower():
+                return True
+            else:
+                return False
+
+    # def __cmp__(self, other):
+    #     """[1] Stephan Ripke
+    #         [2] PGC MDD members
+    #         [3] Study PIs
+    #         [4] Doug Levinson, Naomi Wray, Cathryn Lewis, Gerome Breen, Pat Sullivan
+    #     """
+    #     # are one of you stephan ripke?
+    #     self_group = self.get_group()
+    #     other_group = other.get_group()
+
+    #     if self_group > other_group:
+    #         return 1
+    #     if self_group < other_group:
+    #         return -1
+    #     else:
+    #         if self.name.lower() > other.name.lower():
+    #             return 1
+    #         elif self.name.lower() < other.name.lower():
+    #             return -1
+    #         else:
+    #             return 0

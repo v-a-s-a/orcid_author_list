@@ -14,10 +14,10 @@ import pdb
 import openpyxl as xl
 
 from itertools import chain
+import csv
 
 from Author import Author
 from CanonicalAffiliations import CanonicalAffiliations
-from utilities import remove_duplicates
 
 
 def __main__():
@@ -32,21 +32,26 @@ def __main__():
                         help='Output RTF file to write authors list to.')
     args = parser.parse_args()
 
-    dat = [line for line in open(args.input_file)]
-
     # load canonical affiliations
     affiliations_checker = CanonicalAffiliations()
 
     # load authors from orcid db
-    orcids = remove_duplicates([x.strip() for x in dat if x])
-    authors = {orcid: Author(orcid, affiliations_checker) for orcid in orcids}
+    orcid_contributions = list()
+    fconn = csv.reader(open(args.input_file), delimiter='\t')
+    next(fconn, None)  # skip header
+    for line in fconn:
+        orcid_contributions.append((line[1].strip(), [x.strip() for x in line[4].split(',')]))
+
+    authors = {x[0]: Author(orcid=x[0], contributions=x[1], affiliations_checker=affiliations_checker) for x in orcid_contributions}
+    # sort authors by contribution
+    sorted_orcids = [x.orcid for x in sorted(authors.values())]
 
     # index unque affiliations based on author order in the orginal .csv file
     affiliations_index = dict()  # institution: printed index
     index_affiliations = dict()  # printed index: institution
     affiliations_seen_count = dict()
     counter = 1  # keep track of what order institutions appear in
-    for orcid in orcids:
+    for orcid in sorted_orcids:
         if authors[orcid].affiliations:
             for affiliation in authors[orcid].affiliations:
                 if affiliations_index.get(affiliation):
@@ -61,7 +66,7 @@ def __main__():
 
     # print author list: name and affilliation reference
     authors_with_affiliations = [authors[orcid]
-                                 for orcid in orcids
+                                 for orcid in sorted_orcids
                                  if authors[orcid].affiliations]
     # pdb.set_trace()
     author_affiliations = [author.affiliations
