@@ -76,7 +76,7 @@ class Affiliation:
             self.region, self.country, self.postal_code, self.disambiguated_id,
             self.disambiguation_source
         )
-        return tuple((x.encode('utf8') for x in result))
+        return list((x.encode('utf8') for x in result))
 
     def __hash__(self):
         _hash_string = ' '.join([self.disambiguated_id,

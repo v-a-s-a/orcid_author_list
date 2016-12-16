@@ -99,6 +99,16 @@ def __main__():
         for index, affiliation, count in zip(encoded_affiliation_index, encoded_affiliations, encoded_affiliation_counts):
             affiliation_sheet.append(list(chain([index], [count], affiliation)))
 
+        affiliation_changes_sheet = workbook.create_sheet('affiliations_changes')
+        affiliation_changes_sheet.append(
+            ("affiliation_type", "department", "institution_name", "city",
+                "region", "country", "postal_code", "disambiguated_id",
+                "disambiguation_source")
+        )
+        for observed, canonical in affiliations_checker._corrected_affiliations.items():
+            affiliation_changes_sheet.append(['observed'] + observed.list_fields_utf())
+            affiliation_changes_sheet.append(['canonical'] + canonical.list_fields_utf())
+
         workbook.save(args.output_file)
     else:
         with open(args.output_file, 'wb') as outFile:
