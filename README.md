@@ -16,3 +16,5 @@ $ orcid_author_list.py --input tests/test_orcids.txt --out test_author_list.rtf
 ```
 This generates an RTF formatted file `test_author_list.rtf` containing the author list.
 
+Additionally, there is a "comparison view" that generates a set of spreadsheets to aid in combining and replacing author affiliations. This can be invoked with the added `--comparison-view` flag.
+
